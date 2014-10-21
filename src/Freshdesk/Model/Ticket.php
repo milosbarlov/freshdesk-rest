@@ -109,7 +109,7 @@ class Ticket extends Base
     /**
      * @var int
      */
-    private $hasAttachments = 0;
+    private $attachmentCount = 0;
 
     /**
      * @var array - add all setters that require a DateTime instsance as argument
@@ -125,17 +125,19 @@ class Ticket extends Base
     public function setAttachments(array $attachments)
     {
         $this->attachments = array();
-        $this->hasAttachments = 0;
+        $this->attachmentCount = 0;
         $boundary = $this->getBoundary();
         foreach ($attachments as $attachment)
         {
             if (!$attachment instanceof Attachment)
                 $attachment = new Attachment($attachment);
             $this->attachments[] = $attachment->setBoundary(
-                $boundary
-            );
+                    $boundary
+                )->setOwnerKey(
+                    self::RESPONSE_KEY
+                );
         }
-        $this->hasAttachments = count($this->attachments);
+        $this->attachmentCount = count($this->attachments);
         return $this;
     }
 
@@ -146,9 +148,11 @@ class Ticket extends Base
     public function addAttachment(Attachment $attachment)
     {
         $this->attachments[] = $attachment->setBoundary(
-            $this->getBoundary()
-        );
-        $this->hasAttachments++;
+                $this->getBoundary()
+            )->setOwnerKey(
+                self::RESPONSE_KEY
+            );
+        $this->attachmentCount++;
         return $this;
     }
 
@@ -165,7 +169,7 @@ class Ticket extends Base
      */
     public function getAttachmentCount()
     {
-        return $this->hasAttachments;
+        return $this->attachmentCount;
     }
 
     /**
@@ -173,7 +177,7 @@ class Ticket extends Base
      */
     public function hasAttachments()
     {
-        return ($this->hasAttachments > 0);
+        return ($this->attachmentCount > 0);
     }
 
     /**
@@ -489,11 +493,17 @@ class Ticket extends Base
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function getCustomFields()
     {
         return $this->customField;
     }
 
+    /**
+     * @return array|string
+     */
     public function toCurlPayload()
     {
         $keyF = self::RESPONSE_KEY.'[%s]';
@@ -509,7 +519,7 @@ class Ticket extends Base
         );
         foreach ($keys as $key)
             $data[sprintf($keyF, $key)] = $this->{$key};
-        if ($this->hasAttachments === 1)
+        if ($this->attachmentCount === 1)
         {
             $attachment = $this->attachments[0]
                 ->toArray();

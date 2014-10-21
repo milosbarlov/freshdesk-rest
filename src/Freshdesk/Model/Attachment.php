@@ -51,6 +51,30 @@ class Attachment extends Base
     protected $name = null;
 
     /**
+     * @var string
+     */
+    protected $ownerKey = null;
+
+    /**
+     * @param string $key
+     * @return $this
+     */
+    public function setOwnerKey($key)
+    {
+        $this->ownerKey = $key;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOwnerKey()
+    {
+        if ($this->ownerKey === null)
+            $this->ownerKey = self::RESPONSE_KEY;
+        return $this->ownerKey;
+    }
+    /**
      * Override parent behaviour
      * Accept SplFileInfo, CURLFile, string, array or traversable objects
      * @param \CURLFile|\SplFileInfo|string|null $data
@@ -262,7 +286,8 @@ class Attachment extends Base
         $array = $this->toArray();
         $resource = $array['resource'];
         $data = array(
-            'Content-Disposition: form-data; name="helpdesk_ticket[attachments][][resource]"; filename="' . $resource->postname . '"',
+            'Content-Disposition: form-data; name="'.$this->getOwnerKey().
+                '[attachments][][resource]"; filename="' . $resource->postname . '"',
             'Content-Type: '.$resource->mime,
             '',
             file_get_contents($resource->name)

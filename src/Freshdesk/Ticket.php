@@ -305,17 +305,20 @@ class Ticket extends Rest
     {
         if ($ticket->hasAttachments())
         {
-            $headers = array(
-                'Content-type: multipart/form-data'
-            );
-            $data = $ticket->toJsonData();
-            if (is_string($data))
-                $headers[0] .= '; boundary='.$ticket->getBoundary();
-            $response = $this->multipartCall(
-                '/helpdesk/tickets.json',
-                $data,
-                $headers
-            );
+            $data = $ticket->toCurlPayload();
+            if ($ticket->getAttachmentCount() > 1)
+                $response = $this->multipartCall(
+                    '/helpdesk/tickets.json',
+                    $data,
+                    array(
+                        'Content-type: multipart/form-data; boundary='.$ticket->getBoundary()
+                    )
+                );
+            else
+                $response = $this->multipartCall(
+                    '/helpdesk/tickets.json',
+                    $data
+                );
             if (!$response)
                 throw new RuntimeException(
                     sprintf(
@@ -390,6 +393,40 @@ class Ticket extends Rest
             $note->getTicket()
                 ->getDisplayId()
         );
+        if ($note->hasAttachments())
+        {
+            if ($note->getAttachmentCount() === 1)
+            {
+                $response = $this->multipartCall(
+                    $url,
+                    $note->toCurlPayload()
+                );
+            }
+            else
+            {
+                $response = $this->multipartCall(
+                    $url,
+                    $note->toCurlPayload(),
+                    array(
+                        'Content-type: multipart/form-data; boundary='.$note->getBoundary()
+                    )
+                );
+            }
+            if (!$response)
+                throw new RuntimeException(
+                    sprintf(
+                        'Failed to create ticket with data: %s',
+                        json_encode($note->toCurlPayload())
+                    )
+                );
+            $json = json_decode(
+                $response
+            );
+            //update ticket model, set ids and created timestamp
+            return $note->setAll(
+                $json->helpdesk_ticket
+            );
+        }
         $response = json_decode(
             $this->restCall(
                 $url,
@@ -404,7 +441,6 @@ class Ticket extends Rest
                     json_encode($response)
                 )
             );
-        //todo set properties on Note instance
         return $note->setAll($response);
     }
 }

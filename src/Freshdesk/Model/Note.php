@@ -68,12 +68,78 @@ class Note extends Base
     protected $attachments = null;
 
     /**
+     * @var int
+     */
+    private $attachmentCount = 0;
+
+    /**
      * @var array
      */
     protected $toDateTime = array(
         'setUpdatedAt',
         'setCreatedAt'
     );
+
+    /**
+     * @param array $attachments
+     * @return $this
+     */
+    public function setAttachments(array $attachments)
+    {
+        $this->attachments = array();
+        $this->attachmentCount = 0;
+        foreach ($attachments as $attachment)
+        {
+            if (!$attachment instanceof Attachment)
+                $attachment = new Attachment($attachment);
+            $this->attachments[] = $attachment->setBoundary(
+                    $this->getBoundary()
+                )->setOwnerKey(
+                    self::RESPONSE_KEY
+                );
+        }
+        $this->attachmentCount = count($this->attachments);
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAttachments()
+    {
+        return $this->attachments;
+    }
+
+    /**
+     * @param Attachment $attachment
+     * @return $this
+     */
+    public function addAttachment(Attachment $attachment)
+    {
+        $this->attachments[] = $attachment->setBoundary(
+                $this->getBoundary()
+            )->setOwnerKey(
+                self::RESPONSE_KEY
+            );
+        ++$this->attachmentCount;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAttachmentCount()
+    {
+        return $this->attachmentCount;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasAttachments()
+    {
+        return ($this->attachmentCount > 0);
+    }
 
     /**
      * @param string $body
@@ -241,24 +307,6 @@ class Note extends Base
     }
 
     /**
-     * @param array $attachments
-     * @return $this
-     */
-    public function setAttachments(array $attachments)
-    {
-        $this->attachments = $attachments;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAttachments()
-    {
-        return $this->attachments;
-    }
-
-    /**
      * @param \DateTime $updatedAt
      * @return $this
      */
@@ -293,6 +341,63 @@ class Note extends Base
     {
         return $this->userId;
     }
+
+    /**
+     * @return array|string
+     */
+    public function toCurlPayload()
+    {
+        $keyF = self::RESPONSE_KEY.'[%s]';
+        $keys = array(
+            'body',
+            'private',
+        );
+        $data = array();
+        foreach ($keys as $key)
+            $data[sprintf($keyF, $key)] = $this->{$key};
+        if ($this->attachmentCount === 1)
+        {
+            $attachment = $this->attachments[0]
+                ->toArray();
+            $key = sprintf(
+                $keyF,
+                'attachments][][resource'
+            );
+            if ($attachment['resource'] instanceof \stdClass)
+            {
+                $data[$key] = '@'.$attachment['resource']->name;
+            }
+            else
+            {
+                $data[$key] = $attachment['resource'];
+            }
+            return $data;
+        }
+        $contentF = 'Content-Disposition: form-data; name="%s"';
+        $boundary = '--'.$this->getBoundary();
+        $chunks = array();
+        foreach ($data as $key => $val)
+        {
+            $chunks[] = $boundary;
+            $chunks[] = sprintf($contentF, $key);
+            $chunks[] = '';
+            $chunks[] = $val;
+        }
+        foreach ($this->attachments as $attachment)
+        {
+            $chunks[] = $boundary;
+            /** @var Attachment $attachment */
+            $chunks[] = $attachment->toJsonData();
+        }
+        $chunks[] = $boundary.'--';
+        $chunks[] = '';
+        $chunks[] = '';
+        return implode(
+            "\r\n",
+            $chunks
+        );
+    }
+
 
     /**
      * Get the json-string for this ticket instance
