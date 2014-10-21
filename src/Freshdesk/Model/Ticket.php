@@ -97,11 +97,84 @@ class Ticket extends Base
     protected $customField = array();
 
     /**
+     * @var array<Attachment>
+     */
+    protected $attachments = array();
+
+    /**
+     * @var string
+     */
+    protected $boundary = null;
+
+    /**
+     * @var int
+     */
+    private $hasAttachments = 0;
+
+    /**
      * @var array - add all setters that require a DateTime instsance as argument
      */
     protected $toDateTime = array(
         'setCreatedAt'
     );
+
+    /**
+     * @param array $attachments
+     * @return $this
+     */
+    public function setAttachments(array $attachments)
+    {
+        $this->attachments = array();
+        $this->hasAttachments = 0;
+        $boundary = $this->getBoundary();
+        foreach ($attachments as $attachment)
+        {
+            if (!$attachment instanceof Attachment)
+                $attachment = new Attachment($attachment);
+            $this->attachments[] = $attachment->setBoundary(
+                $boundary
+            );
+        }
+        $this->hasAttachments = count($this->attachments);
+        return $this;
+    }
+
+    /**
+     * @param Attachment $attachment
+     * @return $this
+     */
+    public function addAttachment(Attachment $attachment)
+    {
+        $this->attachments[] = $attachment->setBoundary(
+            $this->getBoundary()
+        );
+        $this->hasAttachments++;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAttachments()
+    {
+        return $this->attachments;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAttachmentCount()
+    {
+        return $this->hasAttachments;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasAttachments()
+    {
+        return ($this->hasAttachments > 0);
+    }
 
     /**
      * @param string $desc
@@ -387,8 +460,9 @@ class Ticket extends Base
     {
         if ($name === null)
             return $this->customField;
-        foreach ($this->customField as $k => $field)
+        foreach ($this->customField as $field)
         {
+            /** @var CustomField $field */
             if ($field->getName() == $name)
                 return $field;
         }
@@ -418,6 +492,64 @@ class Ticket extends Base
     public function getCustomFields()
     {
         return $this->customField;
+    }
+
+    public function toCurlPayload()
+    {
+        $keyF = self::RESPONSE_KEY.'[%s]';
+        $keys = array(
+            'email',
+            'subject',
+            'description',
+            'priority',
+            'status'
+        );
+        $data = array(
+            'cc_emails' => $this->getCcEmailVal()
+        );
+        foreach ($keys as $key)
+            $data[sprintf($keyF, $key)] = $this->{$key};
+        if ($this->hasAttachments === 1)
+        {
+            $attachment = $this->attachments[0]
+                ->toArray();
+            $key = sprintf(
+                $keyF,
+                'attachments][][resource'
+            );
+            if ($attachment['resource'] instanceof \stdClass)
+            {
+                $data[$key] = '@'.$attachment['resource']->name;
+            }
+            else
+            {
+                $data[$key] = $attachment['resource'];
+            }
+            return $data;
+        }
+        $contentF = 'Content-Disposition: form-data; name="%s"';
+        $boundary = '--'.$this->getBoundary();
+        $chunks = array();
+        foreach ($data as $key => $val)
+        {
+            $chunks[] = $boundary;
+            $chunks[] = sprintf($contentF, $key);
+            $chunks[] = '';
+            $chunks[] = $val;
+        }
+        foreach ($this->attachments as $attachment)
+        {
+            $chunks[] = $boundary;
+            /** @var Attachment $attachment */
+            $chunks[] = $attachment->toJsonData();
+        }
+        $chunks[] = $boundary.'--';
+        $chunks[] = '';
+        $chunks[] = '';
+        return implode(
+            "\r\n",
+            $chunks
+        );
     }
 
     /**

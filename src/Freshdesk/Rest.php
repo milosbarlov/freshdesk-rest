@@ -63,6 +63,64 @@ class Rest
     }
 
     /**
+     * @param string $uri
+     * @param array|string $data
+     * @param array $headers
+     * @return mixed
+     * @throws \RuntimeException
+     */
+    protected function multipartCall($uri, $data, array $headers = array('Content-type: application/json'))
+    {
+        if ($uri{0} !== '/')
+            $uri = '/'.$uri;
+        $url = $this->config->getScheme().
+            $this->config->getDomain().
+            $uri;
+        $opts = array(
+            \CURLOPT_USERPWD        => $this->config->getUsername().':'.$this->config->getPassword(),
+            \CURLOPT_HTTPHEADER     => $headers,
+            \CURLOPT_RETURNTRANSFER => true,
+            \CURLOPT_HTTPAUTH       => \CURLAUTH_BASIC,
+            \CURLOPT_SSL_VERIFYHOST => 0,
+            \CURLOPT_SSL_VERIFYPEER => 0,
+            \CURLOPT_POST           => true,
+            \CURLOPT_POSTFIELDS     => $data
+        );
+        if ($this->proxyServer)
+            $opts[\CURLOPT_PROXY] = $this->proxyServer;
+        $ch = curl_init($url);
+        if (!is_resource($ch))
+        {
+            throw new \RuntimeException(
+                'Could not init curl request'
+            );
+        }
+        if (!curl_setopt_array($ch, $opts))
+        {
+            throw new \RuntimeException('Could not set curl options');
+        }
+        $this->lastHttpResponseText = $httpResponse = curl_exec($ch);
+        $this->lastHttpStatusCode = $httpCode = (int) curl_getinfo(
+            $ch,
+            \CURLINFO_HTTP_CODE
+        );
+        if ($httpCode < 200 || $httpCode > 299)
+        {
+            curl_close($ch);//close curl
+            throw new \RuntimeException(
+                sprintf(
+                    'POST action to %s returned unexpected HTTP code (%d), repsonse: %s',
+                    $url,
+                    $httpCode,
+                    $httpResponse
+                )
+            );
+        }
+        curl_close($ch);
+        return $httpResponse;
+    }
+
+    /**
      * @param $urlMinusDomain - should start with /... example /solutions/categories.xml
      * @param $method - should be either GET, POST, PUT (and theoretically DELETE but that's untested).
      * @param string $postData - only specified if $method == POST or PUT

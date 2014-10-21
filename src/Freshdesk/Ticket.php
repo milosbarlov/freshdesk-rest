@@ -303,6 +303,34 @@ class Ticket extends Rest
      */
     public function createNewTicket(TicketM $ticket)
     {
+        if ($ticket->hasAttachments())
+        {
+            $headers = array(
+                'Content-type: multipart/form-data'
+            );
+            $data = $ticket->toJsonData();
+            if (is_string($data))
+                $headers[0] .= '; boundary='.$ticket->getBoundary();
+            $response = $this->multipartCall(
+                '/helpdesk/tickets.json',
+                $data,
+                $headers
+            );
+            if (!$response)
+                throw new RuntimeException(
+                    sprintf(
+                        'Failed to create ticket with data: %s',
+                        json_encode($data)
+                    )
+                );
+            $json = json_decode(
+                $response
+            );
+            //update ticket model, set ids and created timestamp
+            return $ticket->setAll(
+                $json->helpdesk_ticket
+            );
+        }
         $data = $ticket->toJsonData();
         $response = $this->restCall(
             '/helpdesk/tickets.json',

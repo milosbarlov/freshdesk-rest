@@ -36,6 +36,11 @@ abstract class Base implements Iterator
     protected $toDateTime = array();
 
     /**
+     * @var string
+     */
+    protected $boundary = null;
+
+    /**
      * $data should be an array, an instance of stdClass
      * OR an object that implements the \Traversable interface
      * @param null|array|\stdClass|\Traversable $data = null
@@ -62,6 +67,28 @@ abstract class Base implements Iterator
         if ($data === null)
             return $this;
         return $this->setAll($data);
+    }
+
+    /**
+     * @param string $b
+     * @return $this
+     */
+    public function setBoundary($b)
+    {
+        $this->boundary = $b;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBoundary()
+    {
+        if ($this->boundary === null)
+            $this->setBoundary(
+                md5(time())
+            );
+        return $this->boundary;
     }
 
     /**
