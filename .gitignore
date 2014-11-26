@@ -3,6 +3,7 @@
 alertus.php
 memo.txt
 *~
+.*
 composer.phar
 composer.lock
 vendor/
