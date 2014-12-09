@@ -36,6 +36,60 @@ class Ticket extends Rest
     }
 
     /**
+     * @return null|array
+     */
+    public function getApiUserTickets()
+    {
+        $json = $this->restCall(
+            '/helpdesk/tickets.json',
+            self::METHOD_GET
+        );
+        if (!$json)
+            return null;
+        $raw = json_decode($json);
+        $models = array();
+        foreach ($raw as $data)
+        {
+            $models[] = new TicketM($data);
+        }
+        return $models;
+    }
+
+    /**
+     * @param int $page = 1
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function getAllTickets($page = 1)
+    {
+        if (!is_numeric($page))
+            throw new \InvalidArgumentException(
+                sprintf(
+                    '%s expects $page to be positive integer, not "%s"',
+                    __METHOD__,
+                    (string) $page
+                )
+            );
+        $page = abs((int) $page);
+        $page = $page > 1 ? $page : 1;
+        $json = $this->restCall(
+            sprintf(
+                '/helpdesk/tickets.json?filter_name=all_tickets&page=%d',
+                $page
+            )
+        );
+        if (!$json)
+            return array();
+        $models = array();
+        $raw = json_decode($json);
+        foreach ($raw as $data)
+        {
+            $models[] = new TicketM($data);
+        }
+        return $models;
+    }
+
+    /**
      * Get all tickets from user (based on email)
      * @param string $email
      * @return null|\stdClass|array
@@ -161,13 +215,19 @@ class Ticket extends Rest
     }
 
     /**
-     * @param int $id
+     * This method can take a single TicketM instance, too
+     * It'll then use the displayId of that model, and set it
+     * @param int|TicketM $id
      * @param TicketM $model = null
      * @return TicketM
      * @throws \RuntimeException
      */
     public function getTicketById($id, TicketM $model = null)
     {
+        if ($id instanceof TicketM && $model === null)
+        {
+            return $this->getFullTicket($id);
+        }
         $ticket = json_decode(
             $this->restCall(
                 sprintf(

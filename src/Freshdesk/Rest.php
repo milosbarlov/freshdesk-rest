@@ -63,10 +63,10 @@ class Rest
     }
 
     /**
-     * @param $urlMinusDomain - should start with /... example /solutions/categories.xml
-     * @param $method - should be either GET, POST, PUT (and theoretically DELETE but that's untested).
-     * @param string $postData - only specified if $method == POST or PUT
-     * @param $debugMode {bool} optional - prints the request and response with headers
+     * @param string $urlMinusDomain - should start with /... example /solutions/categories.xml
+     * @param string $method - use Rest::METHOD_* constants
+     * @param string $postData = '' (only required for POST or PUT requests)
+     * @param bool $debugMode = false
      * @return string
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
@@ -246,98 +246,92 @@ class Rest
 
     /**
      * Returns all the open tickets of the API user's credentials used for the request
+     * @deprecated
      * @return null|\stdClass
+     * @throws \BadMethodCallException
      */
     public function getApiUserTickets()
     {
-        $json = $this->restCall(
-            '/helpdesk/tickets.json',
-            self::METHOD_GET
+        throw new \BadMethodCallException(
+            sprintf(
+                '%s is deprecated, use Ticket::%s instead',
+                __METHOD__,
+                __FUNCTION__
+            )
         );
-
-        if (!$json)
-            return null;
-        return json_decode($json);
     }
 
 
     /**
      * Returns all the tickets
-     * @param int $page
-     * @return null|\stdClass
+     * @deprecated
+     * @throws \BadMethodCallException
      */
-    public function getAllTickets($page, $filterAll = false)
+    public function getAllTickets()
     {
-        $base = '/helpdesk/tickets.json?';
-        if ($filterAll === true)
-            $base .= 'filter_name=all_tickets&';
-        $base .= 'page='.$page;
-        $json = $this->restCall(
-            $base,
-            self::METHOD_GET
+        throw new \BadMethodCallException(
+            sprintf(
+                '%s is deprecated, use Ticket::%s instead',
+                __METHOD__,
+                __FUNCTION__
+            )
         );
-
-        if (!$json)
-            return null;
-        return json_decode($json);
     }
 
 
     /**
      * Returns the Ticket, this method takes in the IDs for a ticket.
-     * @param int $ticketId
-     * @return null|\stdClass
+     * @deprecated
+     * @throws \BadMethodCallException
      */
-    public function getSingleTicket($ticketId)
+    public function getSingleTicket()
     {
-        $json = $this->restCall(
-            '/helpdesk/tickets/'.$ticketId.'.json',
-            self::METHOD_GET
+        throw new \BadMethodCallException(
+            sprintf(
+                '%s is deprecated, use Ticket::getFullTicket or Ticket::getTicketById instead',
+                __METHOD__
+            )
         );
-        if (!$json)
-            return null;
-        return json_decodE($json);
     }
 
 
     /**
      * Returns all tickets from the user specified by email address
-     * @param string $email
-     * @return null|\stdClass
+     * @deprecated
+     * @throws \BadMethodCallException
      */
-    public function getUserTickets($email)
+    public function getUserTickets()
     {
-        $json = $this->restCall(
-            '/helpdesk/ticket/user_ticket.json?email='.$email,
-            self::METHOD_GET
+        throw new \BadMethodCallException(
+            sprintf(
+                '%s is deprecated, use Ticket::getTicketsByEmail instead',
+                __METHOD__
+            )
         );
-        if (!$json)
-            return null;
-        return json_decode($json);
     }
 
 
     /**
      * Returns tickets for a specific view
-     * @param int $viewId
-     * @param int $page
-     * @return null|\stdClass
+     * @deprecated
+     * @throws \BadMethodCallException
      */
-    public function getTicketView($viewId, $page)
+    public function getTicketView()
     {
-        $json = $this->restCall(
-            '/helpdesk/tickets/view/'.$viewId.'?format=json&page='.$page,
-            self::METHOD_GET
+        throw new \BadMethodCallException(
+            sprintf(
+                '%s is deprecated, use Ticket::getTicketsByView instead',
+                __METHOD__
+            )
         );
-        if (!$json)
-            return null;
-        return json_decode($json);
     }
 
 
     /**
      * Returns the fields available to helpdesk tickets
      * @return null|\stdClass
+     * @deprecated
+     * @todo find fitting API section for this
      */
     public function getTicketFields()
     {
@@ -355,6 +349,8 @@ class Rest
      * Returns the Survey for a given ticket, this method takes in the IDs for a ticket
      * @param int $ticketId
      * @return null|\stdClass
+     * @deprecated
+     * @todo: add survey support
      */
     public function getTicketSurvey($ticketId)
     {
