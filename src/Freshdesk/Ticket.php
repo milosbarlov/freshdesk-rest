@@ -36,17 +36,27 @@ class Ticket extends Rest
     }
 
     /**
-     * Returns all the open tickets of the API user's credentials used for the request
+     * Returns all the open tickets 
      * @return null|array
      */
-    public function getApiUserTickets()
+    public function getApiAllTickets($criteria = null,$condition = null)
     {
-        $json = json_decode(
-            $this->restCall(
-                '/helpdesk/tickets.json',
-                self::METHOD_GET
-            )
-        );
+        if(!$criteria || !$condition){
+            $json = json_decode(
+                $this->restCall(
+                    '/api/v2/tickets',
+                    self::METHOD_GET
+                )
+            );
+        }else{
+            $json = json_decode(
+                $this->restCall(
+                    '/api/v2/tickets?'.$criteria.'='.$condition,
+                    self::METHOD_GET
+                )
+            );
+        }
+       
 
         if (!$json)
             return null;
@@ -193,10 +203,7 @@ class Ticket extends Rest
     {
         $ticket = json_decode(
             $this->restCall(
-                sprintf(
-                    '/helpdesk/tickets/%s.json',
-                    (int) $id
-                ),
+                "/api/v2/tickets/{$id}?include=conversations",
                 self::METHOD_GET
             )
         );
@@ -208,11 +215,11 @@ class Ticket extends Rest
                     $ticket->errors->error
                 )
             );
+        
         if ($model)
-            return $model->setAll(
-                $ticket->helpdesk_ticket
-            );
-        return new TicketM($ticket->helpdesk_ticket);
+            return $model->setAll($ticket);
+
+       return new TicketM($ticket);
     }
 
     /**
@@ -328,7 +335,7 @@ class Ticket extends Rest
     {
         $data = $ticket->toJsonData();
         $response = $this->restCall(
-            '/helpdesk/tickets.json',
+            '/api/v2/tickets',
             self::METHOD_POST,
             $data
         );
@@ -339,13 +346,9 @@ class Ticket extends Rest
                     $data
                 )
             );
-        $json = json_decode(
-            $response
-        );
+        $json = json_decode($response);
         //update ticket model, set ids and created timestamp
-        return $ticket->setAll(
-            $json->helpdesk_ticket
-        );
+        return $ticket->setAll($json);
     }
 
     /**
@@ -353,12 +356,9 @@ class Ticket extends Rest
      * @param TicketM $ticket
      * @return $this
      */
-    public function updateTicket(TicketM $ticket)
+    public function updateTicket($id,TicketM $ticket)
     {
-        $url = sprintf(
-            '/helpdesk/tickets/%d.json',
-            $ticket->getDisplayId()
-        );
+        $url = '/api/v2/tickets/'.$id;
         $data = $ticket->toJsonData();
         $response = json_decode(
             $this->restCall(
@@ -367,9 +367,7 @@ class Ticket extends Rest
                 $data
             )
         );
-        return $ticket->setAll(
-            $response->ticket
-        );
+        return $ticket->setAll($response);
     }
 
     /**
@@ -379,22 +377,19 @@ class Ticket extends Rest
      * @param bool $reload = false
      * @return TicketM
      */
-    public function deleteTicket(TicketM $ticket, $reload = false)
+    public function deleteTicket($id)
     {
-        $url = sprintf(
-            '/helpdesk/tickets/%d.json',
-            $ticket->getDisplayId()
-        );
-        $response = $ticket->toJsonData();
+        $url ='/api/v2/tickets/'.$id;
         $response = json_decode(
             $this->restCall(
                 $url,
                 self::METHOD_DEL
             )
         );
-        if ($reload === true)
-            return $this->getFullTicket($ticket);
-        return $ticket->setDeleted(true);
+        if (!$response)
+            throw new RuntimeException('Ticket is not deleted');
+
+        return true;
     }
 
     /**
@@ -402,12 +397,9 @@ class Ticket extends Rest
      * @param TicketM $ticket
      * @return TicketM
      */
-    public function restoreTicket(TicketM $ticket)
+    public function restoreTicket($id)
     {
-        $url = sprintf(
-            '/helpdesk/tickets/%d/restore.json',
-            $ticket->getDisplayId()
-        );
+        $url = "/api/v2/tickets/{$id}/restore";
         $response = json_decode(
             $this->restCall(
                 $url,
@@ -418,7 +410,7 @@ class Ticket extends Rest
         {//API documentation is a tad unclear: according to freshdesk.com/api, the response is an array
             $response = $response[0];
         }
-        return $ticket->setAll($response);
+        return true;
     }
 
     /**
@@ -488,4 +480,23 @@ class Ticket extends Rest
         //todo set properties on Note instance
         return $note->setAll($response);
     }
+
+  /************************************ Contact ************************************************/
+
+    public function addContact($data){
+        $url = '/api/v2/contacts';
+        $data = json_encode($data);
+        
+        $response = json_decode(
+            $this->restCall(
+                $url,
+                self::METHOD_POST,
+                $data
+            )
+        );
+        
+        return $response;
+    }
+
+
 }

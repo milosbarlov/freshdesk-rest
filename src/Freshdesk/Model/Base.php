@@ -60,7 +60,7 @@ abstract class Base implements Iterator
                 $this->getters[] = $method;
         }
         if ($data === null)
-            return $this;
+                return $this;
         return $this->setAll($data);
     }
 

@@ -29,7 +29,7 @@ class Ticket extends Base
     const STATUS_RESOLVED = 4;
     const STATUS_CLOSED = 5;
 
-    const CC_EMAIL = '<your cc_email here>';
+    const CC_EMAIL = '';
 
     /**
      * @var int
@@ -105,6 +105,11 @@ class Ticket extends Base
      * @var array
      */
     protected $tags = array();
+
+    /**
+     * @var array
+     */
+    protected $conversations = [];
 
     /**
      * @var array<CustomField>
@@ -534,18 +539,17 @@ class Ticket extends Base
      */
     public function toJsonData()
     {
-        $data = array(
-            self::RESPONSE_KEY => array(
-                'description'   => $this->description,
-                'subject'       => $this->subject,
-                'email'         => $this->email,
-                'priority'      => $this->priority,
-                'status'        => $this->status
-            ),
-            'cc_emails' => $this->getCcEmailVal()
-        );
 
-        $custom = array();
+        $data = [
+            'description'   => $this->description,
+            'subject'       => $this->subject,
+            'responder_id'  => $this->responderId,
+            'requester_id'  => $this->requesterId,
+            'priority'      => $this->priority,
+            'status'        => $this->status
+        ];
+
+        $custom = [];
         $customFields = $this->getCustomFields();
         /** @var \Freshdesk\Model\CustomField $f */
         foreach ($customFields as $f)
@@ -565,5 +569,13 @@ class Ticket extends Base
         }
 
         return json_encode($data);
+    }
+
+    public function getConversations(){
+        return $this->conversations;
+    }
+
+    public function setConversations($conversations){
+        $this->conversations = $conversations;
     }
 }
