@@ -170,8 +170,8 @@ class Rest
         $opts = array(
             \CURLOPT_USERPWD        => $this->config->getUsername().':'.$this->config->getPassword(),
             \CURLOPT_HTTPHEADER     => array(
-              //  'Content-type: application/json'
-                'Content-type:  multipart/form-data'
+               'Content-type: application/json'
+              //  'Content-type:  multipart/form-data'
             ),
             \CURLOPT_RETURNTRANSFER => true,
             \CURLOPT_HTTPAUTH       => \CURLAUTH_BASIC,
