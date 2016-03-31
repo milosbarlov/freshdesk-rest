@@ -7,5 +7,8 @@
             "email": "milosbarlov@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+	"php": ">=5.3.0",
+        "ext-curl": "*"
+	}
 }
