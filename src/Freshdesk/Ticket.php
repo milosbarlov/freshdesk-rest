@@ -481,6 +481,22 @@ class Ticket extends Rest
         return $note->setAll($response);
     }
 
+    public function createTicketReplay($ticketId,$replayText)
+    {
+        $url = "/api/v2/tickets/{$ticketId}/reply";
+        $data = json_encode($replayText);
+
+        $response = json_decode(
+            $this->restCall(
+                $url,
+                self::METHOD_POST,
+                $data
+            )
+        );
+
+        return $response;
+    }
+
   /************************************ Contact ************************************************/
 
     public function addContact($data){
