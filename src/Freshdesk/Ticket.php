@@ -497,20 +497,17 @@ class Ticket extends Rest
         return $response;
     }
 
-  /************************************ Contact ************************************************/
+   public function getAgent($id)
+    {
+        $url = "/api/v2/agents/{$id}";
 
-    public function addContact($data){
-        $url = '/api/v2/contacts';
-        $data = json_encode($data);
-        
         $response = json_decode(
             $this->restCall(
                 $url,
-                self::METHOD_POST,
-                $data
+                self::METHOD_GET
             )
         );
-        
+
         return $response;
     }
 
