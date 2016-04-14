@@ -20,7 +20,7 @@ class Note extends Base
     /**
      * @var bool
      */
-    protected $private = false;
+    protected $private = true;
 
     /**
      * @var string
@@ -309,11 +309,8 @@ class Note extends Base
     {
         return json_encode(
             array(
-                //note has oddity in used response key
-                'helpdesk_'.self::RESPONSE_KEY   => array(
-                    'body'      => $this->body,
-                    'private'   => $this->private
-                )
+                'body'      => $this->body,
+                'private'   => $this->private
             )
         );
     }

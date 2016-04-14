@@ -456,13 +456,18 @@ class Ticket extends Rest
      * @return Note
      * @throws \RuntimeException
      */
-    public function addNoteToTicket(Note $note)
+    public function addNoteToTicket(Note $note,$id)
     {
+        /*
         $url = sprintf(
             '/helpdesk/tickets/%d/conversations/note.json',
             $note->getTicket()
                 ->getDisplayId()
         );
+        */
+
+        $url = "/api/v2/tickets/{$id}/notes";
+
         $response = json_decode(
             $this->restCall(
                 $url,
@@ -470,13 +475,7 @@ class Ticket extends Rest
                 $note->toJsonData()
             )
         );
-        if (!property_exists($response, 'note'))
-            throw new RuntimeException(
-                sprintf(
-                    'Failed to add note: %s',
-                    json_encode($response)
-                )
-            );
+       
         //todo set properties on Note instance
         return $note->setAll($response);
     }
@@ -497,7 +496,7 @@ class Ticket extends Rest
         return $response;
     }
 
-   public function getAgent($id)
+    public function getAgent($id)
     {
         $url = "/api/v2/agents/{$id}";
 
