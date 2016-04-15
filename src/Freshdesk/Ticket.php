@@ -203,7 +203,7 @@ class Ticket extends Rest
     {
         $ticket = json_decode(
             $this->restCall(
-                "/api/v2/tickets/{$id}?include=conversations",
+                "/api/v2/tickets/{$id}",
                 self::METHOD_GET
             )
         );
@@ -499,6 +499,20 @@ class Ticket extends Rest
     public function getAgent($id)
     {
         $url = "/api/v2/agents/{$id}";
+
+        $response = json_decode(
+            $this->restCall(
+                $url,
+                self::METHOD_GET
+            )
+        );
+
+        return $response;
+    }
+
+    public function allConversations($id)
+    {
+        $url = "/api/v2/tickets/{$id}/conversations";
 
         $response = json_decode(
             $this->restCall(
