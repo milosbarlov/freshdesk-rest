@@ -123,6 +123,8 @@ class Ticket extends Base
         'setCreatedAt'
     );
 
+    protected $dueBy = '';
+
     /**
      * @param string $desc
      * @return $this
@@ -577,5 +579,16 @@ class Ticket extends Base
 
     public function setConversations($conversations){
         $this->conversations = $conversations;
+        return $this;
     }
+
+     public function getDueBy(){
+         return $this->dueBy;
+     }
+
+    public function setDueBy($dueBy){
+        $this->dueBy = $dueBy;
+        return $this;
+    }
+
 }
