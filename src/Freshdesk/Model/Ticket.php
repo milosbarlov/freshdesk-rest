@@ -125,6 +125,12 @@ class Ticket extends Base
 
     protected $dueBy = '';
 
+    protected $source = 2;
+
+    protected $groupId = '';
+
+    protected $type = null;
+
     /**
      * @param string $desc
      * @return $this
@@ -541,15 +547,20 @@ class Ticket extends Base
      */
     public function toJsonData()
     {
-
         $data = [
             'description'   => $this->description,
             'subject'       => $this->subject,
             'responder_id'  => $this->responderId,
             'requester_id'  => $this->requesterId,
             'priority'      => $this->priority,
-            'status'        => $this->status
+            'status'        => $this->status,
+            'type'          => $this->type,
+            'source'        => (int)$this->source
+
         ];
+        if(!empty($this->groupId)){
+            $data['group_id'] = $this->groupId;
+        }
 
         $custom = [];
         $customFields = $this->getCustomFields();
@@ -588,6 +599,39 @@ class Ticket extends Base
 
     public function setDueBy($dueBy){
         $this->dueBy = $dueBy;
+        return $this;
+    }
+
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    public function setSource($source)
+    {
+        $this->source = $source;
+        return $this;
+    }
+
+    public function getGroupId()
+    {
+        return $this->groupId;
+    }
+
+    public function setGroupId($groupId)
+    {
+        $this->groupId = $groupId;
+        return $this;
+    }
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    public function setType($type)
+    {
+        $this->type = $type;
         return $this;
     }
 
