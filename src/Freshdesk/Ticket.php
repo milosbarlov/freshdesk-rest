@@ -360,6 +360,7 @@ class Ticket extends Rest
     {
         $url = '/api/v2/tickets/'.$id;
         $data = $ticket->toJsonData();
+
         $response = json_decode(
             $this->restCall(
                 $url,
@@ -513,6 +514,34 @@ class Ticket extends Rest
     public function allConversations($id)
     {
         $url = "/api/v2/tickets/{$id}/conversations";
+
+        $response = json_decode(
+            $this->restCall(
+                $url,
+                self::METHOD_GET
+            )
+        );
+
+        return $response;
+    }
+
+    public function getAllAgents()
+    {
+        $url = "/api/v2/agents";
+
+        $response = json_decode(
+            $this->restCall(
+                $url,
+                self::METHOD_GET
+            )
+        );
+
+        return $response;
+    }
+
+    public function getAllGroups()
+    {
+        $url="/api/v2/groups";
 
         $response = json_decode(
             $this->restCall(
