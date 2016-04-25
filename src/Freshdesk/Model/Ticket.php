@@ -127,7 +127,7 @@ class Ticket extends Base
 
     protected $source = 2;
 
-    protected $groupId = '';
+    protected $groupId = null;
 
     protected $type = null;
 
@@ -622,7 +622,7 @@ class Ticket extends Base
 
     public function setGroupId($groupId)
     {
-        $this->groupId = $groupId;
+        $this->groupId = (int)$groupId;
         return $this;
     }
 
