@@ -499,6 +499,7 @@ class Ticket extends Rest
 
     public function getAgent($id)
     {
+        $ticket = new TicketM();
         $url = "/api/v2/agents/{$id}";
 
         $response = json_decode(
@@ -508,7 +509,7 @@ class Ticket extends Rest
             )
         );
 
-        return $response;
+        return $ticket->setAll($response);
     }
 
     public function allConversations($id)
