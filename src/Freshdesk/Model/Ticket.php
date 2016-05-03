@@ -133,6 +133,8 @@ class Ticket extends Base
 
     protected $contact = '';
 
+    protected $productId = '';
+
     /**
      * @param string $desc
      * @return $this
@@ -553,19 +555,19 @@ class Ticket extends Base
             'description'   => $this->description,
             'subject'       => $this->subject,
             'responder_id'  => $this->responderId,
-            'requester_id'  => $this->requesterId,
+            'email'         => $this->email,
             'priority'      => $this->priority,
             'status'        => $this->status,
             'type'          => $this->type,
-            'source'        => (int)$this->source
-
+            'source'        => (int)$this->source,
         ];
         if(!empty($this->groupId)){
             $data['group_id'] = $this->groupId;
         }
 
         $custom = [];
-        $customFields = $this->getCustomFields();
+        $customFields = $this->customField;
+
         /** @var \Freshdesk\Model\CustomField $f */
         foreach ($customFields as $f)
         {
@@ -574,7 +576,7 @@ class Ticket extends Base
 
         if (!empty($custom))
         {
-            $data[self::RESPONSE_KEY]['custom_field'] = $custom;
+            $data['custom_fields'] = $custom;
         }
 
         $tags = $this->getTags();
@@ -583,7 +585,7 @@ class Ticket extends Base
             $data['helpdesk']['tags'] = $tags;
         }
 
-        return json_encode($data);
+         return json_encode($data);
     }
 
     public function getConversations(){
@@ -651,6 +653,17 @@ class Ticket extends Base
     public function getName()
     {
         return $this->contact->name;
+    }
+
+    public function getProductId()
+    {
+        return $this->productId;
+    }
+
+    public function setProductId($productId)
+    {
+        $this->productId = $productId;
+        return $this;
     }
 
 
