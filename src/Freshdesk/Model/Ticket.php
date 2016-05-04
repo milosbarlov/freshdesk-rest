@@ -555,7 +555,7 @@ class Ticket extends Base
             'description'   => $this->description,
             'subject'       => $this->subject,
             'responder_id'  => $this->responderId,
-            'email'         => $this->email,
+            'requester_id'  => $this->requesterId,
             'priority'      => $this->priority,
             'status'        => $this->status,
             'type'          => $this->type,
