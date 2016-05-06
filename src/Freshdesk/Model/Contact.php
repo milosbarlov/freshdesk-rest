@@ -99,6 +99,9 @@ class Contact extends Base
      */
     protected $updatedAt = null;
 
+    protected $companyId = null;
+
+
     /**
      * @var array
      */
@@ -449,6 +452,17 @@ class Contact extends Base
         return $this;
     }
 
+    public function setCompanyId($companyId)
+    {
+        $this->companyId = $companyId;
+        return $this;
+    }
+
+    public function getCompanyId()
+    {
+        return $this->companyId;
+    }
+
     /**
      * No POST requests supported ATM
      * @return string
@@ -458,9 +472,10 @@ class Contact extends Base
         return json_encode(
             array(
                 self::RESPONSE_KEY  => array(
-                    'id'    => $this->getId(),
-                    'email' => $this->getEmail(),
-                    'name'  => $this->getName()
+                    'id'         => $this->getId(),
+                    'email'      => $this->getEmail(),
+                    'name'       => $this->getName(),
+                    'company_id' => $this->getCompanyId()
                 )
             )
         );

@@ -39,8 +39,33 @@ class Ticket extends Rest
      * Returns all the open tickets 
      * @return null|array
      */
-    public function getApiAllTickets($criteria = null,$condition = null)
+    public function getApiAllTickets($condition)
     {
+        if(is_array($condition)){
+            $criteria = '';
+            foreach($condition as $key=>$val){
+                if(!empty($criteria)){
+                    $criteria .="&{$key}={$val}";
+                }else{
+                    $criteria .="{$key}={$val}";
+                }
+            }
+        }else{
+            throw new InvalidArgumentException(
+                'This is not valid prams. You must send array'
+            );
+        }
+
+        $criteria = '/api/v2/tickets?'.$criteria;
+
+        $json = json_decode(
+            $this->restCall(
+                $criteria,
+                self::METHOD_GET
+            )
+        );
+        /*
+
         if(!$criteria || !$condition){
             $json = json_decode(
                 $this->restCall(
@@ -56,6 +81,7 @@ class Ticket extends Rest
                 )
             );
         }
+        */
        
 
         if (!$json)

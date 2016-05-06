@@ -133,7 +133,9 @@ class Ticket extends Base
 
     protected $contact = '';
 
-    protected $productId = '';
+    protected $productId = null;
+
+    protected $companyId = null;
 
     /**
      * @param string $desc
@@ -560,6 +562,7 @@ class Ticket extends Base
             'status'        => $this->status,
             'type'          => $this->type,
             'source'        => (int)$this->source,
+
         ];
         if(!empty($this->groupId)){
             $data['group_id'] = $this->groupId;
@@ -664,6 +667,15 @@ class Ticket extends Base
     {
         $this->productId = $productId;
         return $this;
+    }
+
+    public function setCompanyId($companyId){
+        $this->companyId = $companyId;
+        return $this;
+    }
+
+    public function getCompanyId(){
+        return $this->companyId;
     }
 
 

@@ -31,4 +31,38 @@ class Contact extends Rest
             $response
         );
     }
+    
+    public function getAllContactByCompany($companyId)
+    {
+        $url = "/api/v2/contacts?company_id={$companyId}";
+
+        $response = json_decode(
+            $this->restCall(
+                $url,
+                Rest::METHOD_GET
+            )
+        );
+
+       return $response;
+    }
+
+    public function setUser(ContactM $contact){
+        $data = $contact->toJsonData();
+
+        $response = $this->restCall(
+            '/api/v2/tickets',
+            self::METHOD_POST,
+            $data
+        );
+        if (!$response)
+            throw new RuntimeException(
+                sprintf(
+                    'Failed to create ticket with data: %s',
+                    $data
+                )
+            );
+        $json = json_decode($response);
+
+        return $contact->setAll($json);
+    }
 }

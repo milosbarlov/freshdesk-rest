@@ -310,7 +310,8 @@ class Note extends Base
         return json_encode(
             array(
                 'body'      => $this->body,
-                'private'   => $this->private
+                'private'   => $this->private,
+                'user_id'   => $this->userId
             )
         );
     }
