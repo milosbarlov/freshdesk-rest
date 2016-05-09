@@ -485,14 +485,6 @@ class Ticket extends Rest
      */
     public function addNoteToTicket(Note $note,$id)
     {
-        /*
-        $url = sprintf(
-            '/helpdesk/tickets/%d/conversations/note.json',
-            $note->getTicket()
-                ->getDisplayId()
-        );
-        */
-
         $url = "/api/v2/tickets/{$id}/notes";
 
         $response = json_decode(
@@ -523,21 +515,6 @@ class Ticket extends Rest
         return $response;
     }
 
-    public function getAgent($id)
-    {
-        $ticket = new TicketM();
-        $url = "/api/v2/agents/{$id}";
-
-        $response = json_decode(
-            $this->restCall(
-                $url,
-                self::METHOD_GET
-            )
-        );
-
-        return $ticket->setAll($response);
-    }
-
     public function allConversations($id)
     {
         $url = "/api/v2/tickets/{$id}/conversations";
@@ -551,34 +528,5 @@ class Ticket extends Rest
 
         return $response;
     }
-
-    public function getAllAgents()
-    {
-        $url = "/api/v2/agents";
-
-        $response = json_decode(
-            $this->restCall(
-                $url,
-                self::METHOD_GET
-            )
-        );
-
-        return $response;
-    }
-
-    public function getAllGroups()
-    {
-        $url="/api/v2/groups";
-
-        $response = json_decode(
-            $this->restCall(
-                $url,
-                self::METHOD_GET
-            )
-        );
-
-        return $response;
-    }
-
 
 }

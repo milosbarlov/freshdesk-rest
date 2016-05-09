@@ -7,6 +7,8 @@
  */
 
 namespace Freshdesk;
+use Freshdesk\Model\Product as ProductM;
+
 
 class Product extends Rest
 {
@@ -22,7 +24,31 @@ class Product extends Rest
             )
         );
 
-        return $response;
+        if(!$response)
+            return null;
+
+        $models = [];
+        foreach($response as $model){
+            $models[] = new ProductM($model);
+        }
+
+        return $models;
+    }
+
+    public function getProduct($id)
+    {
+        $url = "/api/v2/products/{$id}";
+
+        $response = json_decode(
+            $this->restCall(
+             $url,
+             Rest::METHOD_GET
+            )
+        );
+
+        $model = new ProductM();
+
+        return $model->setAll($response);
     }
 
 }

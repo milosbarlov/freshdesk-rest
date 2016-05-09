@@ -641,22 +641,7 @@ class Ticket extends Base
         $this->type = $type;
         return $this;
     }
-
-    public function  getContact()
-    {
-        return $this->getContact();
-    }
-
-    public function setContact($contact)
-    {
-        $this->contact = $contact;
-        return $this;
-    }
-
-    public function getName()
-    {
-        return $this->contact->name;
-    }
+    
 
     public function getProductId()
     {

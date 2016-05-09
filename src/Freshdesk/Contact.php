@@ -14,7 +14,6 @@ class Contact extends Rest
      */
     public function getContactById($id, ContactM $model = null)
     {
-       
         $response = json_decode(
             $this->restCall(
                 "/api/v2/contacts/{$id}",

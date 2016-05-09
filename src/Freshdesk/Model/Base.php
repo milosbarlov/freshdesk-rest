@@ -46,6 +46,7 @@ abstract class Base implements Iterator
     {
         $this->class = $class = get_class($this);
         /** @noinspection PhpUndefinedFieldInspection */
+        /*
         if ($class::RESPONSE_KEY === '')
             throw new \RuntimeException(
                 sprintf(
@@ -53,6 +54,7 @@ abstract class Base implements Iterator
                     $class
                 )
             );
+        */
         $methods = get_class_methods($this);
         foreach ($methods as $method)
         {//use GETTERS for iterator interface
