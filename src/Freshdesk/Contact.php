@@ -49,7 +49,7 @@ class Contact extends Rest
         $data = $contact->toJsonData();
 
         $response = $this->restCall(
-            '/api/v2/tickets',
+            '/api/v2/contacts',
             self::METHOD_POST,
             $data
         );

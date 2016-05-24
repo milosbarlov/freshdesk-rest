@@ -463,6 +463,7 @@ class Contact extends Base
         return $this->companyId;
     }
 
+
     /**
      * No POST requests supported ATM
      * @return string
@@ -471,12 +472,9 @@ class Contact extends Base
     {
         return json_encode(
             array(
-                self::RESPONSE_KEY  => array(
-                    'id'         => $this->getId(),
-                    'email'      => $this->getEmail(),
-                    'name'       => $this->getName(),
-                    'company_id' => $this->getCompanyId()
-                )
+                'email'      => $this->getEmail(),
+                'name'       => $this->getName(),
+                'company_id' => $this->getCompanyId()
             )
         );
     }
